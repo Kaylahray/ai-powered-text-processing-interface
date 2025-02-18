@@ -1,7 +1,52 @@
 // app/page.tsx
 "use client";
 import { useState, useRef, useEffect } from "react";
-// import { ArrowUpIcon } from '@heroicons/react/24/solid';
+// import { ArrowUpIcon } from "@heroicons/react/24/solid";
+
+declare global {
+  interface Window {
+    ai: {
+      languageDetector: {
+        capabilities(): Promise<{ capabilities: string }>;
+        create(): Promise<{
+          detect(
+            text: string
+          ): Promise<Array<{ detectedLanguage: string; confidence: number }>>;
+        }>;
+      };
+      summarizer: {
+        create(options?: {
+          sharedContext?: string;
+          type?: "key-points" | "tl;dr" | "teaser" | "headline";
+          format?: "markdown" | "plain-text";
+          length?: "short" | "medium" | "long";
+          monitor?: (m: EventTarget) => void;
+        }): Promise<{
+          summarize(
+            text: string,
+            context?: { context?: string }
+          ): Promise<string>;
+          summarizeStreaming(text: string): ReadableStream<string>;
+          ready: Promise<void>;
+        }>;
+        capabilities(): Promise<{ available: string }>;
+      };
+      translator: {
+        create(options: {
+          sourceLanguage: string;
+          targetLanguage: string;
+          monitor?: (m: EventTarget) => void;
+        }): Promise<{
+          translate(text: string): Promise<string>;
+          ready: Promise<void>;
+        }>;
+        capabilities(): Promise<{
+          languagePairAvailable(source: string, target: string): string;
+        }>;
+      };
+    };
+  }
+}
 
 type Message = {
   text: string;
@@ -31,17 +76,17 @@ export default function Home() {
 
   const detectLanguage = async (text: string) => {
     try {
-      const capabilities = await (
-        self as any
-      ).ai.languageDetector.capabilities();
-      if (capabilities.capabilities === "no")
+      const capabilities = await window.ai.languageDetector.capabilities();
+      if (capabilities.capabilities === "no") {
         throw new Error("Language detection not available");
+      }
 
-      const detector = await (self as any).ai.languageDetector.create();
+      const detector = await window.ai.languageDetector.create();
       const results = await detector.detect(text);
       return results[0]?.detectedLanguage || "unknown";
-    } catch (err) {
+    } catch (error) {
       setError("Language detection failed");
+      console.error("Detection error:", error);
       return "unknown";
     }
   };
@@ -49,14 +94,15 @@ export default function Home() {
   const handleSummarize = async (text: string) => {
     setIsProcessing(true);
     try {
-      const summarizer = await (self as any).ai.summarizer.create();
+      const summarizer = await window.ai.summarizer.create();
       const summary = await summarizer.summarize(text);
       setMessages((prev) => [
         ...prev,
         { text: summary, isUser: false, summary },
       ]);
-    } catch (err) {
+    } catch (error) {
       setError("Summarization failed");
+      console.error("Summarization error:", error);
     }
     setIsProcessing(false);
   };
@@ -68,7 +114,7 @@ export default function Home() {
     setIsProcessing(true);
     try {
       const detectedLang = await detectLanguage(text);
-      const translator = await (self as any).ai.translator.create({
+      const translator = await window.ai.translator.create({
         sourceLanguage: detectedLang,
         targetLanguage: targetLang,
       });
@@ -77,8 +123,9 @@ export default function Home() {
         ...prev,
         { text: translation, isUser: false, translation },
       ]);
-    } catch (err) {
+    } catch (error) {
       setError("Translation failed");
+      console.error("Translation error:", error);
     }
     setIsProcessing(false);
   };
@@ -97,8 +144,9 @@ export default function Home() {
         ...prev.slice(0, -1),
         { ...userMessage, detectedLanguage: detectedLang },
       ]);
-    } catch (err) {
+    } catch (error) {
       setError("Error processing text");
+      console.error("Submission error:", error);
     }
 
     setInputText("");
@@ -134,7 +182,7 @@ export default function Home() {
                   {msg.text.length > 150 && msg.detectedLanguage === "en" && (
                     <button
                       onClick={() => handleSummarize(msg.text)}
-                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
                       disabled={isProcessing}
                     >
                       Summarize
@@ -146,7 +194,8 @@ export default function Home() {
                       onChange={(e) =>
                         setSelectedLang(e.target.value as TranslationLanguage)
                       }
-                      className="border rounded p-2"
+                      className="border rounded p-2 bg-white"
+                      disabled={isProcessing}
                     >
                       {["en", "pt", "es", "ru", "tr", "fr"].map((lang) => (
                         <option key={lang} value={lang}>
@@ -156,7 +205,7 @@ export default function Home() {
                     </select>
                     <button
                       onClick={() => handleTranslate(msg.text, selectedLang)}
-                      className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+                      className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:opacity-50"
                       disabled={isProcessing}
                     >
                       Translate
@@ -182,16 +231,17 @@ export default function Home() {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Enter your text..."
-            className="flex-1 p-2 border rounded-lg resize-none"
+            className="flex-1 p-2 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             rows={3}
             disabled={isProcessing}
+            aria-label="Text input for AI processing"
           />
           <button
             type="submit"
-            className="self-end p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
+            className="self-end p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-colors duration-200"
             disabled={isProcessing || !inputText.trim()}
+            aria-label="Send message"
           >
-            {" "}
             up
             {/* <ArrowUpIcon className="w-6 h-6" /> */}
           </button>
