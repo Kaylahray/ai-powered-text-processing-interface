@@ -8,9 +8,8 @@
   box-sizing: border-box;
 }
 body {
-  background-color: green;
+  background-color: white;
   overflow: hidden;
-  min-height: 100vh;
 }
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
