@@ -4,10 +4,10 @@ import Link from "next/link";
 const page = () => {
   return (
     <div className="relative bg-[url('/bg.png')] bg-cover bg-center bg-no-repeat">
-      <div className="overflow-hidden pt-8 flex flex-col gap-10 items-center">
+      <div className="overflow-hidden pt-8 flex flex-col gap-6 items-center">
         <Image
           src="/logo.svg"
-          width={90}
+          width={50}
           height={40}
           alt="logo"
           className=""
@@ -15,7 +15,7 @@ const page = () => {
         />
         <div className="mx-auto max-w-7xl px-6 py-8 sm:py-10 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:py-10">
           <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto">
-            <h1 className="mt-10 text-pretty text-5xl  text-[#EA8800] sm:text-6xl font-extrabold leading-[80px]">
+            <h1 className="mt-10 text-pretty text-5xl  text-[#EA8800] sm:text-6xl font-extrabold lg:leading-[80px]">
               Supercharge{" "}
               <span className="text-[#373737]">Your Text in Seconds ⚡</span>
             </h1>
