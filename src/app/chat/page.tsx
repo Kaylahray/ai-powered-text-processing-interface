@@ -289,7 +289,7 @@ export default function Home() {
                   {msg.text.length > 150 && msg.detectedLanguage === "en" && (
                     <button
                       onClick={() => handleSummarize(msg.text, idx)}
-                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
+                      className="rounded-lg border border-[#EA8800] px-3 py-2 text-[#EA8800] text-sm font-semibold leading-none disabled:opacity-50"
                       disabled={msg.processingAction !== undefined}
                     >
                       {msg.processingAction === "summarizing"
@@ -300,10 +300,13 @@ export default function Home() {
 
                   <div className="flex flex-col items-start gap-[15px] p-2 rounded-[12px] border border-[#EEE] w-full">
                     {msg.isUser && msg.detectedLanguage && (
-                      <p className="text-sm text-gray-500">
-                        Detected language:{" "}
-                        {languageMap[msg.detectedLanguage] ||
-                          msg.detectedLanguage}
+                      <p className="text-sm text-[#7f7f7f] font-semibold">
+                        Detected language:
+                        <span className="text-[#262626]">
+                          {" "}
+                          {languageMap[msg.detectedLanguage] ||
+                            msg.detectedLanguage}
+                        </span>
                       </p>
                     )}
 
@@ -324,7 +327,7 @@ export default function Home() {
                                 e.target.value as TranslationLanguage
                               )
                             }
-                            className="border rounded p-2 bg-white"
+                            className="border rounded p-2 bg-[#f4f4f4]"
                             disabled={msg.processingAction !== undefined}
                           >
                             {Object.entries(languageMap).map(([code, name]) => (
@@ -342,7 +345,7 @@ export default function Home() {
                                 idx
                               )
                             }
-                            className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:opacity-50"
+                            className="flex w-[121px] p-[10px_12px] text-white text-sm font-semibold leading-none justify-center items-center gap-[10px] rounded-[10px] bg-[#EA8800] disabled:opacity-50"
                             disabled={msg.processingAction !== undefined}
                           >
                             {msg.processingAction === "translating"
@@ -359,7 +362,7 @@ export default function Home() {
                 msg.translation &&
                 msg.translationFrom &&
                 msg.translationTo && (
-                  <div className="flex flex-col mt-2 ml-4">
+                  <div className="flex flex-col mt-2 ml-4 bg-gray-50">
                     <div className="text-sm text-gray-500">
                       Translation from{" "}
                       {languageMap[msg.translationFrom] || msg.translationFrom}{" "}
@@ -372,8 +375,8 @@ export default function Home() {
                 )}
 
               {msg.summary && (
-                <div className="mt-2 text-gray-700 p-3 max-w-[800px] rounded-lg w-full">
-                  <p className="text-sm text-gray-500 mb-1">Summary</p>
+                <div className="mt-2 text-gray-700 p-3 max-w-[800px] rounded-lg bg-gray-50 w-full">
+                  <p className="text-sm text-gray-500 mb-3">Summary</p>
                   <p>{msg.summary}</p>
                 </div>
               )}
