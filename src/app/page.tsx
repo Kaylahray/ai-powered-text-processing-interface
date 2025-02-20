@@ -1,252 +1,81 @@
-// app/page.tsx
-"use client";
-import { useState, useRef, useEffect } from "react";
-// import { ArrowUpIcon } from "@heroicons/react/24/solid";
+import Image from "next/image";
+import Link from "next/link";
 
-declare global {
-  interface Window {
-    ai: {
-      languageDetector: {
-        capabilities(): Promise<{ capabilities: string }>;
-        create(): Promise<{
-          detect(
-            text: string
-          ): Promise<Array<{ detectedLanguage: string; confidence: number }>>;
-        }>;
-      };
-      summarizer: {
-        create(options?: {
-          sharedContext?: string;
-          type?: "key-points" | "tl;dr" | "teaser" | "headline";
-          format?: "markdown" | "plain-text";
-          length?: "short" | "medium" | "long";
-          monitor?: (m: EventTarget) => void;
-        }): Promise<{
-          summarize(
-            text: string,
-            context?: { context?: string }
-          ): Promise<string>;
-          summarizeStreaming(text: string): ReadableStream<string>;
-          ready: Promise<void>;
-        }>;
-        capabilities(): Promise<{ available: string }>;
-      };
-      translator: {
-        create(options: {
-          sourceLanguage: string;
-          targetLanguage: string;
-          monitor?: (m: EventTarget) => void;
-        }): Promise<{
-          translate(text: string): Promise<string>;
-          ready: Promise<void>;
-        }>;
-        capabilities(): Promise<{
-          languagePairAvailable(source: string, target: string): string;
-        }>;
-      };
-    };
-  }
-}
-
-type Message = {
-  text: string;
-  isUser: boolean;
-  detectedLanguage?: string;
-  summary?: string;
-  translation?: string;
-};
-
-type TranslationLanguage = "en" | "pt" | "es" | "ru" | "tr" | "fr";
-
-export default function Home() {
-  const [inputText, setInputText] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedLang, setSelectedLang] = useState<TranslationLanguage>("en");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const detectLanguage = async (text: string) => {
-    try {
-      const capabilities = await window.ai.languageDetector.capabilities();
-      if (capabilities.capabilities === "no") {
-        throw new Error("Language detection not available");
-      }
-
-      const detector = await window.ai.languageDetector.create();
-      const results = await detector.detect(text);
-      return results[0]?.detectedLanguage || "unknown";
-    } catch (error) {
-      setError("Language detection failed");
-      console.error("Detection error:", error);
-      return "unknown";
-    }
-  };
-
-  const handleSummarize = async (text: string) => {
-    setIsProcessing(true);
-    try {
-      const summarizer = await window.ai.summarizer.create();
-      const summary = await summarizer.summarize(text);
-      setMessages((prev) => [
-        ...prev,
-        { text: summary, isUser: false, summary },
-      ]);
-    } catch (error) {
-      setError("Summarization failed");
-      console.error("Summarization error:", error);
-    }
-    setIsProcessing(false);
-  };
-
-  const handleTranslate = async (
-    text: string,
-    targetLang: TranslationLanguage
-  ) => {
-    setIsProcessing(true);
-    try {
-      const detectedLang = await detectLanguage(text);
-      const translator = await window.ai.translator.create({
-        sourceLanguage: detectedLang,
-        targetLanguage: targetLang,
-      });
-      const translation = await translator.translate(text);
-      setMessages((prev) => [
-        ...prev,
-        { text: translation, isUser: false, translation },
-      ]);
-    } catch (error) {
-      setError("Translation failed");
-      console.error("Translation error:", error);
-    }
-    setIsProcessing(false);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
-
-    setError("");
-    const userMessage = { text: inputText, isUser: true };
-    setMessages((prev) => [...prev, userMessage]);
-
-    try {
-      const detectedLang = await detectLanguage(inputText);
-      setMessages((prev) => [
-        ...prev.slice(0, -1),
-        { ...userMessage, detectedLanguage: detectedLang },
-      ]);
-    } catch (error) {
-      setError("Error processing text");
-      console.error("Submission error:", error);
-    }
-
-    setInputText("");
-  };
-
+const page = () => {
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.isUser ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-xl p-4 rounded-lg ${
-                msg.isUser ? "bg-blue-500 text-white" : "bg-white shadow-md"
-              }`}
-            >
-              <p>{msg.text}</p>
-              {msg.detectedLanguage && (
-                <p className="text-sm mt-2 text-gray-500">
-                  Detected language: {msg.detectedLanguage}
-                </p>
-              )}
-              {!msg.isUser && (msg.summary || msg.translation) && (
-                <div className="mt-2 p-2 bg-gray-100 rounded">
-                  {msg.summary && <p>Summary: {msg.summary}</p>}
-                  {msg.translation && <p>Translation: {msg.translation}</p>}
-                </div>
-              )}
-              {msg.isUser && (
-                <div className="mt-4 space-y-2">
-                  {msg.text.length > 150 && msg.detectedLanguage === "en" && (
-                    <button
-                      onClick={() => handleSummarize(msg.text)}
-                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
-                      disabled={isProcessing}
-                    >
-                      Summarize
-                    </button>
-                  )}
-                  <div className="flex gap-2">
-                    <select
-                      value={selectedLang}
-                      onChange={(e) =>
-                        setSelectedLang(e.target.value as TranslationLanguage)
-                      }
-                      className="border rounded p-2 bg-white"
-                      disabled={isProcessing}
-                    >
-                      {["en", "pt", "es", "ru", "tr", "fr"].map((lang) => (
-                        <option key={lang} value={lang}>
-                          {lang.toUpperCase()}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() => handleTranslate(msg.text, selectedLang)}
-                      className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:opacity-50"
-                      disabled={isProcessing}
-                    >
-                      Translate
-                    </button>
-                  </div>
-                </div>
-              )}
+    <div className="relative bg-[url('/bg.png')] bg-cover bg-center bg-no-repeat">
+      <div className="overflow-hidden pt-8 flex flex-col gap-10 items-center">
+        <Image
+          src="/logo.svg"
+          width={90}
+          height={40}
+          alt="logo"
+          className=""
+          aria-hidden="true"
+        />
+        <div className="mx-auto max-w-7xl px-6 py-8 sm:py-10 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:py-10">
+          <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto">
+            <h1 className="mt-10 text-pretty text-5xl  text-[#EA8800] sm:text-6xl font-extrabold leading-[80px]">
+              Supercharge{" "}
+              <span className="text-[#373737]">Your Text in Seconds ⚡</span>
+            </h1>
+            <p className="mt-8 max-w-[565px] text-pretty text-lg font-medium text-gray-500 sm:text-xl/8">
+              Detect languages, summarize essays, and translate seamlessly—all
+              in one place. No expertise needed, just paste and go!
+            </p>
+            <div className="mt-10 flex items-center gap-x-6">
+              <Link
+                href="/chat"
+                className=" inline-block gap-2 px-6 py-4 text-white text-base font-semibold rounded-lg bg-[#EA8800] leading-normal cursor-pointer transition-all duration-300 hover:bg-[#d97706]"
+              >
+                Try It Now - For Free
+              </Link>
+            </div>
+
+            <div className="inline-flex flex-col px-6 py-5 mt-14 items-start gap-4 rounded-xl border border-[#EEE] bg-white/30 backdrop-blur-md">
+              <h2 className="text-[#4D4D4D] text-base font-bold leading-normal">
+                Features
+              </h2>
+              <ul className="list-disc pl-5 text-[#4D4D4D] text-[14px] leading-[21px]">
+                <li>
+                  <span className="font-semibold">🔍 Detect languages</span> in
+                  seconds.
+                </li>
+                <li>
+                  <span className="font-semibold">✂️ Summarize essays</span>{" "}
+                  into clear, concise bullet points.
+                </li>
+                <li>
+                  <span className="font-semibold">🌎 Translate</span> seamlessly
+                  across English, Portuguese, Spanish, Russian, Turkish, and
+                  French.
+                </li>
+              </ul>
             </div>
           </div>
-        ))}
-        <div ref={messagesEndRef} />
+          <div className="mt-16 sm:mt-24 lg:mt-0 lg:shrink-0 lg:grow">
+            <Image
+              src="/aiImage.png"
+              width={571}
+              height={464}
+              alt=""
+              aria-hidden="true"
+            />
+          </div>
+        </div>
       </div>
-
-      {error && (
-        <div className="mx-4 mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
-          {error}
+      <footer className="bg-white">
+        <div className="mx-auto max-w-7xl px-6 py-4 md:flex md:items-center md:justify-between lg:px-8">
+          <div className="flex justify-center gap-x-6 md:order-2">
+            <h1>KAYLA</h1>
+          </div>
+          <p className="mt-8 text-center text-sm/6 text-gray-600 md:order-1 md:mt-0">
+            &copy; 2024 Kayla, Inc. All rights reserved.
+          </p>
         </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="p-4 bg-white border-t">
-        <div className="flex gap-2">
-          <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder="Enter your text..."
-            className="flex-1 p-2 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            rows={3}
-            disabled={isProcessing}
-            aria-label="Text input for AI processing"
-          />
-          <button
-            type="submit"
-            className="self-end p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-colors duration-200"
-            disabled={isProcessing || !inputText.trim()}
-            aria-label="Send message"
-          >
-            up
-            {/* <ArrowUpIcon className="w-6 h-6" /> */}
-          </button>
-        </div>
-      </form>
+      </footer>
     </div>
   );
-}
+};
+
+export default page;
