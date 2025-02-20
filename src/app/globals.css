@@ -8,7 +8,9 @@
   box-sizing: border-box;
 }
 body {
-  background-color: white;
+  background-color: green;
+  overflow: hidden;
+  min-height: 100vh;
 }
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
@@ -16,10 +18,4 @@ body {
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-@layer base {
-  :root {
-    --radius: 0.5rem;
-  }
 }

@@ -396,7 +396,7 @@ export default function Home() {
             value={inputText}
             onChange={handleChange}
             placeholder="Enter your text..."
-            className="flex-1 p-4 px-6 border border-[#E3E3E3]  bg-[#FAFAFA] w-full outline-none focus:outline-[#212121] focus:outline-[2px] focus:outline-offset-4 rounded-[28px] resize-none overflow-auto text-gray-700 text-base leading-relaxed"
+            className="flex-1 p-4 px-6 border border-[#E3E3E3] hide-scrollbar bg-[#FAFAFA] w-full outline-none focus:outline-[#212121] focus:outline-[2px] focus:outline-offset-4 rounded-[28px] resize-none overflow-auto text-gray-700 text-base leading-relaxed"
             rows={1}
             style={{ minHeight: "48px", maxHeight: "150px" }}
             aria-label="Text input for AI processing"
@@ -404,7 +404,7 @@ export default function Home() {
           <button
             type="submit"
             className="flex items-center gap-2.5 py-4 px-3.5 rounded-[36px] bg-[#EA8800] disabled:opacity-50"
-            disabled={!inputText.trim()}
+            disabled={inputText.trim().length < 2}
             aria-label="Send message"
           >
             <Image
