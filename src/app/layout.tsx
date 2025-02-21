@@ -18,15 +18,15 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta
-          httpEquiv="origin-trial"
+          http-equiv="origin-trial"
           content={process.env.NEXT_PUBLIC_ORIGIN_TRIAL_ONE}
         />
         <meta
-          httpEquiv="origin-trial"
+          http-equiv="origin-trial"
           content={process.env.NEXT_PUBLIC_ORIGIN_TRIAL_TWO}
         />
         <meta
-          httpEquiv="origin-trial"
+          http-equiv="origin-trial"
           content={process.env.NEXT_PUBLIC_ORIGIN_TRIAL_THREE}
         />
       </head>
