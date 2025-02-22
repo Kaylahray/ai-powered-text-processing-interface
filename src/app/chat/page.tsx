@@ -11,7 +11,7 @@ import MessagesList from "@/helperComponents/Messages";
 import ErrorDisplay from "@/helperComponents/ErrorDisplay";
 import MessageInput from "@/helperComponents/MessageInput";
 
-const page = () => {
+const Page = () => {
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedLangs, setSelectedLangs] = useState<
@@ -179,4 +179,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
