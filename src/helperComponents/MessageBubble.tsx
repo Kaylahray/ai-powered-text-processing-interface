@@ -26,7 +26,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   idx,
 }) => {
   return (
-    <div key={idx} className="w-full max-w-4xl mx-auto bg-yellow-400">
+    <div key={idx} className="w-full max-w-4xl mx-auto">
       <div className={`flex ${msg.isUser ? "justify-end" : "justify-start"}`}>
         {!msg.translation && msg.isUser && !msg.summary && (
           <div
