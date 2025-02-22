@@ -26,23 +26,13 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   idx,
 }) => {
   return (
-    <div
-      key={idx}
-      className="w-full max-w-4xl mx-auto"
-      role="listitem" // Added for screen reader semantics
-      aria-live="polite" // Announces updates to assistive tech
-    >
+    <div key={idx} className="w-full max-w-4xl mx-auto bg-yellow-400">
       <div className={`flex ${msg.isUser ? "justify-end" : "justify-start"}`}>
         {!msg.translation && msg.isUser && !msg.summary && (
           <div
-            className={`flex flex-col p-3 items-start gap-6 rounded-[20px] bg-white max-w-[600px]`}
-            aria-labelledby={`message-${idx}-text`} // Associates content with label
+            className={`flex flex-col p-3 items-start gap-6 rounded-[20px] bg-white max-w-[600px] `}
           >
-            <p
-              className="text-[#262626] text-base font-medium leading-normal"
-              id={`message-${idx}-text`} // ID for aria-labelledby
-              aria-label={msg.isUser ? "Your message" : "AI response"} // Context for screen readers
-            >
+            <p className="text-[#262626] text-base font-medium leading-normal">
               {msg.text}
             </p>
             {msg.text.length > 150 && msg.detectedLanguage === "en" && (
@@ -50,8 +40,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                 onClick={() => handleSummarize(msg.text, idx)}
                 className="rounded-lg border border-[#EA8800] px-3 py-2 text-[#EA8800] text-sm font-semibold leading-none disabled:opacity-50"
                 disabled={msg.processingAction !== undefined}
-                aria-label={`Summarize this ${msg.text.length}-character text`} // Action description
-                aria-busy={msg.processingAction === "summarizing"} // Loading state
               >
                 {msg.processingAction === "summarizing"
                   ? "Summarizing..."
@@ -59,12 +47,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
               </button>
             )}
 
-            <div className="flex flex-col items-start gap-[15px] p-2 rounded-[12px] border border-[#EEE]">
+            <div className="flex flex-col items-start gap-[15px] p-2 rounded-[12px] border border-[#EEE] ">
               {msg.isUser && msg.detectedLanguage && (
-                <p
-                  className="text-sm text-[#7f7f7f] font-semibold"
-                  aria-label="Detected language" // Context for screen readers
-                >
+                <p className="text-sm text-[#7f7f7f] font-semibold">
                   Detected language:
                   <span className="text-[#262626]">
                     {" "}
@@ -74,24 +59,13 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
               )}
 
               {msg.translationError && (
-                <p
-                  className="text-sm text-red-500 mt-1"
-                  role="alert" // Important for error visibility
-                  aria-live="assertive" // Forces immediate announcement
-                >
+                <p className="text-sm text-red-500 mt-1">
                   {msg.translationError}
                 </p>
               )}
 
               {msg.isUser && (
-                <div
-                  className="flex flex-wrap gap-2"
-                  role="group" // Groups related controls
-                  aria-labelledby={`translation-controls-${idx}`} // Group label
-                >
-                  <span id={`translation-controls-${idx}`} className="sr-only">
-                    Translation controls for message {idx + 1}
-                  </span>
+                <div className="flex flex-wrap gap-2">
                   <div className="flex gap-2">
                     <select
                       value={selectedLangs[idx] || "en"}
@@ -103,8 +77,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                       }
                       className="border rounded p-2 bg-[#f4f4f4]"
                       disabled={msg.processingAction !== undefined}
-                      aria-label="Select target language" // Clear purpose
-                      aria-describedby={`selected-lang-${idx}`} // Current selection
                     >
                       {Object.entries(languageMap).map(([code, name]) => (
                         <option key={code} value={code}>
@@ -112,10 +84,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                         </option>
                       ))}
                     </select>
-                    <span id={`selected-lang-${idx}`} className="sr-only">
-                      Selected language:{" "}
-                      {languageMap[selectedLangs[idx] || "en"]}
-                    </span>
                     <button
                       onClick={() =>
                         handleTranslate(
@@ -127,10 +95,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                       }
                       className="flex w-[121px] p-[10px_12px] text-white text-sm font-semibold leading-none justify-center items-center gap-[10px] rounded-[10px] bg-[#EA8800] disabled:opacity-50"
                       disabled={msg.processingAction !== undefined}
-                      aria-label={`Translate to ${
-                        languageMap[selectedLangs[idx] || "en"]
-                      }`} // Clear action
-                      aria-busy={msg.processingAction === "translating"} // Loading state
                     >
                       {msg.processingAction === "translating"
                         ? "Translating..."
@@ -146,10 +110,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           msg.translation &&
           msg.translationFrom &&
           msg.translationTo && (
-            <div
-              className="flex flex-col mt-2 p-4 max-w-[600px] rounded-md bg-orange-50 opacity-0.5"
-              aria-label="Translation result" // Context for screen readers
-            >
+            <div className="flex flex-col mt-2 p-4 max-w-[600px] rounded-md bg-orange-50 opacity-0.5">
               <div className="text-sm text-gray-500">
                 Translation from{" "}
                 {languageMap[msg.translationFrom] || msg.translationFrom} to{" "}
@@ -162,10 +123,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           )}
 
         {msg.summary && (
-          <div
-            className="mt-2 text-gray-700 p-4 max-w-[600px] rounded-lg border-2 border-[#fff] w-full"
-            aria-live="polite" // Announces summary updates
-          >
+          <div className="mt-2 text-gray-700 p-4 max-w-[600px] rounded-lg border-2 border-[#fff] w-full">
             <p className="text-sm text-gray-500 mb-3">Summary</p>
             <p>{msg.summary}</p>
           </div>
