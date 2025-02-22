@@ -272,7 +272,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 p-5">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-1 space-y-4">
         {messages.map((msg, idx) => (
           <div key={idx}>
             {/* Main message bubble */}
@@ -364,7 +364,7 @@ export default function Home() {
                 msg.translation &&
                 msg.translationFrom &&
                 msg.translationTo && (
-                  <div className="flex flex-col p-8 rounded-md mt-2 ml-4 bg-gray-50">
+                  <div className="flex flex-col w-3/4 sm:w-auto py-4 px-2 rounded-lg mt-2 bg-gray-50">
                     <div className="text-sm text-gray-500">
                       Translation from{" "}
                       {languageMap[msg.translationFrom] || msg.translationFrom}{" "}
@@ -377,7 +377,7 @@ export default function Home() {
                 )}
 
               {msg.summary && (
-                <div className="mt-2 text-gray-700 p-8 max-w-[800px] rounded-xl bg-gray-50 w-full">
+                <div className="mt-2 text-gray-700  p-8 max-w-[600px] rounded-xl bg-gray-50 ">
                   <p className="text-sm text-gray-500 mb-3">Summary</p>
                   <p>{msg.summary}</p>
                 </div>
@@ -395,20 +395,20 @@ export default function Home() {
       )}
 
       <form onSubmit={handleSubmit}>
-        <div className="flex max-w-[880px] h-fit rounded-[44px] bg-white items-center justify-center p-6 mx-auto gap-4 w-full">
+        <div className="flex max-w-[880px] h-fit rounded-md lg:rounded-[44px] bg-white items-center justify-center p-2 lg:p-6 mx-auto gap-4 w-full">
           <textarea
             ref={textareaRef}
             value={inputText}
             onChange={handleChange}
             placeholder="Enter your text..."
-            className="flex-1 p-4 px-6 border border-[#E3E3E3] hide-scrollbar bg-[#FAFAFA] w-full outline-none focus:outline-[#212121] focus:outline-[2px] focus:outline-offset-4 rounded-[28px] resize-none overflow-auto text-gray-700 text-base leading-relaxed"
+            className="flex-1 p-2 lg:p-4 lg:px-6 border border-[#E3E3E3] hide-scrollbar bg-[#FAFAFA] w-full outline-none focus:outline-[#212121] focus:outline-[2px] focus:outline-offset-4 rounded-[28px] resize-none overflow-auto text-gray-700 text-base leading-relaxed"
             rows={1}
             style={{ minHeight: "48px", maxHeight: "150px" }}
             aria-label="Text input for AI processing"
           />
           <button
             type="submit"
-            className="flex items-center gap-2.5 py-4 px-3.5 rounded-[36px] bg-[#EA8800] disabled:opacity-50"
+            className="flex items-center gap-2.5 p-2 lg:py-4 lg:px-3.5 rounded-[36px] bg-[#EA8800] disabled:opacity-50"
             disabled={inputText.trim().length < 2}
             aria-label="Send message"
           >
