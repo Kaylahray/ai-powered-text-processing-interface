@@ -1,50 +1,64 @@
-// components/MessageInput.tsx
-import { ArrowUp } from "lucide-react";
-import { LoadingSpinner } from "./LoadingSpinner";
+import React from "react";
+import Image from "next/image";
 
 interface MessageInputProps {
   inputText: string;
-  setInputText: (text: string) => void;
-  onSubmit: (e: React.FormEvent) => Promise<void>;
-  isProcessing: boolean;
+  setInputText: React.Dispatch<React.SetStateAction<string>>;
+  handleSubmit: (e: React.FormEvent) => Promise<void>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
-export const MessageInput = ({
+const MessageInput: React.FC<MessageInputProps> = ({
   inputText,
   setInputText,
-  onSubmit,
-  isProcessing,
-}: MessageInputProps) => {
+  handleSubmit,
+  textareaRef,
+}) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputText(e.target.value);
+    adjustTextareaHeight();
+  };
+
+  const adjustTextareaHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(
+        textareaRef.current.scrollHeight,
+        150
+      )}px`;
+    }
+  };
+
   return (
-    <form 
-      onSubmit={onSubmit} 
-      className="p-4 bg-white border-t"
-      role="form"
-      aria-label="Message input form"
-    >
-      <div className="flex gap-2">
+    <form onSubmit={handleSubmit}>
+      <div className="flex max-w-[880px] h-fit rounded-md lg:rounded-[44px] bg-white items-center justify-center p-2 lg:p-6 mx-auto gap-4 w-full">
         <textarea
+          ref={textareaRef}
           value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
+          onChange={handleChange}
           placeholder="Enter your text..."
-          className="flex-1 p-2 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          rows={3}
-          disabled={isProcessing}
+          className="flex-1 p-4 px-6 border border-[#E3E3E3] hide-scrollbar bg-[#FAFAFA] w-full outline-none focus:outline-[#212121] focus:outline-[2px] focus:outline-offset-4 rounded-[30px] resize-none overflow-auto text-gray-700 text-base "
+          rows={1}
+          style={{ minHeight: "48px", maxHeight: "150px" }}
           aria-label="Text input for AI processing"
         />
         <button
           type="submit"
-          className="self-end p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-colors duration-200 flex items-center justify-center"
-          disabled={isProcessing || !inputText.trim()}
+          className="flex items-center gap-2.5 p-2 lg:py-4 lg:px-3.5 rounded-[36px] bg-[#EA8800] disabled:opacity-50"
+          disabled={inputText.trim().length < 2}
           aria-label="Send message"
         >
-          {isProcessing ? (
-            <LoadingSpinner />
-          ) : (
-            <ArrowUp className="w-6 h-6" />
-          )}
+          <Image
+            src="/send.svg"
+            width={20}
+            height={20}
+            alt=""
+            aria-hidden="true"
+          />
         </button>
       </div>
     </form>
   );
 };
+
+export default MessageInput;

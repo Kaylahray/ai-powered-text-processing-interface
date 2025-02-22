@@ -1,104 +1,137 @@
-// import { Message, TranslationLanguage } from "../types";
-import { LoadingSpinner } from "./LoadingSpinner";
-export type Message = {
-    text: string;
-    isUser: boolean;
-    detectedLanguage?: string;
-    summary?: string;
-    translation?: string;
-  };
-  
-  export type TranslationLanguage = "en" | "pt" | "es" | "ru" | "tr" | "fr";
+import React from "react";
+import LanguageSelector from "./LanguageSelector";
+import { Message, TranslationLanguage } from "@/types";
+
 interface MessageBubbleProps {
-  message: Message;
-  onSummarize: (text: string) => Promise<void>;
-  onTranslate: (text: string, lang: TranslationLanguage) => Promise<void>;
-  isProcessing: boolean;
-  selectedLang: TranslationLanguage;
-  setSelectedLang: (lang: TranslationLanguage) => void;
+  msg: Message;
+  handleSummarize: (text: string, messageIndex: number) => Promise<void>;
+  handleTranslate: (
+    text: string,
+    sourceLanguage: string,
+    targetLang: TranslationLanguage,
+    messageIndex: number
+  ) => Promise<void>;
+  selectedLangs: Record<number, TranslationLanguage>;
+  handleLanguageSelect: (messageIdx: number, lang: TranslationLanguage) => void;
+  languageMap: Record<string, string>;
+  idx: number;
 }
 
-export const MessageBubble = ({
-  message,
-  onSummarize,
-  onTranslate,
-  isProcessing,
-  selectedLang,
-  setSelectedLang,
-}: MessageBubbleProps) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({
+  msg,
+  handleSummarize,
+  handleTranslate,
+  selectedLangs,
+  handleLanguageSelect,
+  languageMap,
+  idx,
+}) => {
   return (
-    <div
-      className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}
-      role="article"
-    >
-      <div
-        className={`max-w-xl p-4 rounded-lg ${
-          message.isUser ? "bg-blue-500 text-white" : "bg-white shadow-md"
-        }`}
-      >
-        <p>{message.text}</p>
-        {message.detectedLanguage && (
-          <p 
-            className="text-sm mt-2 text-gray-500"
-            aria-label={`Detected language: ${message.detectedLanguage}`}
+    <div key={idx} className="w-full max-w-4xl mx-auto">
+      <div className={`flex ${msg.isUser ? "justify-end" : "justify-start"}`}>
+        {!msg.translation && msg.isUser && !msg.summary && (
+          <div
+            className={`flex flex-col p-3 items-start gap-6 rounded-[20px] bg-white max-w-[600px] `}
           >
-            Detected language: {message.detectedLanguage}
-          </p>
-        )}
-        {!message.isUser && (message.summary || message.translation) && (
-          <div 
-            className="mt-2 p-2 bg-gray-100 rounded"
-            role="region"
-            aria-label="Processing results"
-          >
-            {message.summary && (
-              <p aria-label="Summary result">Summary: {message.summary}</p>
+            <p className="text-[#262626] text-base font-medium leading-normal">
+              {msg.text}
+            </p>
+            {msg.text.length > 150 && msg.detectedLanguage === "en" && (
+              <button
+                onClick={() => handleSummarize(msg.text, idx)}
+                className="rounded-lg border border-[#EA8800] px-3 py-2 text-[#EA8800] text-sm font-semibold leading-none disabled:opacity-50"
+                disabled={msg.processingAction !== undefined}
+              >
+                {msg.processingAction === "summarizing"
+                  ? "Summarizing..."
+                  : "Summarize"}
+              </button>
             )}
-            {message.translation && (
-              <p aria-label="Translation result">Translation: {message.translation}</p>
-            )}
+
+            <div className="flex flex-col items-start gap-[15px] p-2 rounded-[12px] border border-[#EEE] ">
+              {msg.isUser && msg.detectedLanguage && (
+                <p className="text-sm text-[#7f7f7f] font-semibold">
+                  Detected language:
+                  <span className="text-[#262626]">
+                    {" "}
+                    {languageMap[msg.detectedLanguage] || msg.detectedLanguage}
+                  </span>
+                </p>
+              )}
+
+              {msg.translationError && (
+                <p className="text-sm text-red-500 mt-1">
+                  {msg.translationError}
+                </p>
+              )}
+
+              {msg.isUser && (
+                <div className="flex flex-wrap gap-2">
+                  <div className="flex gap-2">
+                    <select
+                      value={selectedLangs[idx] || "en"}
+                      onChange={(e) =>
+                        handleLanguageSelect(
+                          idx,
+                          e.target.value as TranslationLanguage
+                        )
+                      }
+                      className="border rounded p-2 bg-[#f4f4f4]"
+                      disabled={msg.processingAction !== undefined}
+                    >
+                      {Object.entries(languageMap).map(([code, name]) => (
+                        <option key={code} value={code}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() =>
+                        handleTranslate(
+                          msg.text,
+                          msg.detectedLanguage || "unknown",
+                          selectedLangs[idx] || "en",
+                          idx
+                        )
+                      }
+                      className="flex w-[121px] p-[10px_12px] text-white text-sm font-semibold leading-none justify-center items-center gap-[10px] rounded-[10px] bg-[#EA8800] disabled:opacity-50"
+                      disabled={msg.processingAction !== undefined}
+                    >
+                      {msg.processingAction === "translating"
+                        ? "Translating..."
+                        : "Translate"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
-        {message.isUser && (
-          <div className="mt-4 space-y-2">
-            {message.text.length > 150 && message.detectedLanguage === "en" && (
-              <button
-                onClick={() => onSummarize(message.text)}
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50 flex items-center gap-2"
-                disabled={isProcessing}
-                aria-busy={isProcessing}
-              >
-                {isProcessing && <LoadingSpinner />}
-                Summarize
-              </button>
-            )}
-            <div className="flex gap-2">
-              <select
-                value={selectedLang}
-                onChange={(e) => setSelectedLang(e.target.value as TranslationLanguage)}
-                className="border rounded p-2 bg-white"
-                disabled={isProcessing}
-                aria-label="Select target language"
-              >
-                {["en", "pt", "es", "ru", "tr", "fr"].map((lang) => (
-                  <option key={lang} value={lang}>
-                    {lang.toUpperCase()}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={() => onTranslate(message.text, selectedLang)}
-                className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:opacity-50 flex items-center gap-2"
-                disabled={isProcessing}
-                aria-busy={isProcessing}
-              >
-                {isProcessing && <LoadingSpinner />}
-                Translate
-              </button>
+        {!msg.isUser &&
+          msg.translation &&
+          msg.translationFrom &&
+          msg.translationTo && (
+            <div className="flex flex-col mt-2 p-4 max-w-[600px] rounded-md bg-orange-50 opacity-0.5">
+              <div className="text-sm text-gray-500">
+                Translation from{" "}
+                {languageMap[msg.translationFrom] || msg.translationFrom} to{" "}
+                {languageMap[msg.translationTo]}
+              </div>
+              <p className="text-[#262626] text-base font-medium leading-normal">
+                {msg.text}
+              </p>
             </div>
+          )}
+
+        {msg.summary && (
+          <div className="mt-2 text-gray-700 p-3 max-w-[600px] rounded-lg bg-gray-50 w-full">
+            <p className="text-sm text-gray-500 mb-3">Summary</p>
+            <p>{msg.summary}</p>
           </div>
         )}
       </div>
     </div>
   );
 };
+
+export default MessageBubble;
