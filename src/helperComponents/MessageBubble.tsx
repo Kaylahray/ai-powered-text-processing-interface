@@ -1,5 +1,6 @@
+
+
 import React from "react";
-import LanguageSelector from "./LanguageSelector";
 import { Message, TranslationLanguage } from "@/types";
 
 interface MessageBubbleProps {
@@ -124,7 +125,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           )}
 
         {msg.summary && (
-          <div className="mt-2 text-gray-700 p-3 max-w-[600px] rounded-lg bg-gray-50 w-full">
+          <div className="mt-2 text-gray-700 p-4 max-w-[600px] rounded-lg border-2 border-[#fff] w-full">
             <p className="text-sm text-gray-500 mb-3">Summary</p>
             <p>{msg.summary}</p>
           </div>
