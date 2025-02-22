@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const page = () => {
+const Home = () => {
   return (
     <div className="relative bg-[url('/bg.png')] bg-cover bg-center bg-no-repeat">
       <div className="overflow-hidden pt-8 flex flex-col gap-6 items-center">
@@ -78,4 +78,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Home;
