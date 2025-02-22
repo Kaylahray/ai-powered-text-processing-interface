@@ -277,7 +277,9 @@ export default function Home() {
           <div key={idx}>
             {/* Main message bubble */}
             <div
-              className={`flex ${msg.isUser ? "justify-end" : "justify-start"}`}
+              className={`flex max-w-7xl mx-auto ${
+                msg.isUser ? "justify-end" : "justify-start"
+              }`}
             >
               {!msg.translation && msg.isUser && !msg.summary && (
                 <div
@@ -362,7 +364,7 @@ export default function Home() {
                 msg.translation &&
                 msg.translationFrom &&
                 msg.translationTo && (
-                  <div className="flex flex-col mt-2 ml-4 bg-gray-50">
+                  <div className="flex flex-col p-8 rounded-md mt-2 ml-4 bg-gray-50">
                     <div className="text-sm text-gray-500">
                       Translation from{" "}
                       {languageMap[msg.translationFrom] || msg.translationFrom}{" "}
@@ -375,7 +377,7 @@ export default function Home() {
                 )}
 
               {msg.summary && (
-                <div className="mt-2 text-gray-700 p-3 max-w-[800px] rounded-lg bg-gray-50 w-full">
+                <div className="mt-2 text-gray-700 p-8 max-w-[800px] rounded-xl bg-gray-50 w-full">
                   <p className="text-sm text-gray-500 mb-3">Summary</p>
                   <p>{msg.summary}</p>
                 </div>
